@@ -4,6 +4,7 @@ const MongoStore = require('connect-mongo')
 // const flash = require('connect-flash')
 const router = require('./router')
 const fileUpload = require('express-fileupload')
+const cors = require('cors');
 
 const app = express()
 
@@ -21,6 +22,7 @@ let sessionOptions = session({
     cookie: { maxAge: 1000 * 60 * 60 * 24, httpOnly: true }
 })
 
+app.use(cors());
 app.use(sessionOptions)
 // app.use(flash())
 app.use(fileUpload({

@@ -26,20 +26,24 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Fetch user data and role from local storage
-    const storedUserData = localStorage.getItem("signupFormData");
-    if (storedUserData) {
-      const parsedData = JSON.parse(storedUserData);
-      const { email, password, selectedRole } = parsedData;
-      if (email === formData.email && password === formData.password) {
-        console.log("User logged in with role:", selectedRole);
-        // Handle success or redirect to the appropriate dashboard based on the role
-        return;
-      }
-    }
+    try {
+      // Replace the URL with your actual API endpoint
+      const apiUrl = "http://localhost:4000/organisor/login";
+      
+      // Make an HTTP POST request to the API
+      const response = await axios.post(apiUrl, {
+        orgEmail: formData.email,
+        orgPassword: formData.password,
+      });
 
-    console.error("Invalid credentials");
-    // Handle invalid credentials, e.g., show an error message to the user
+      // Assuming the API returns some data, handle it here
+      console.log("API Response:", response.data);
+
+      // Handle success or redirect to the appropriate dashboard
+    } catch (error) {
+      console.error("Error during login:", error.message);
+      // Handle invalid credentials or other errors
+    }
   };
 
   return (

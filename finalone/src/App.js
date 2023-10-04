@@ -30,7 +30,7 @@ function App() {
   return (
     <>
       <BrowserRouter>
-        <SignUpForm />
+        <LoginForm />
         <Routes>
         <Route path="/" element={<Dashboard/>} />
           <Route path="/chat" element={<Chat />} />
