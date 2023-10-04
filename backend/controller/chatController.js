@@ -12,17 +12,6 @@ try{
 }
 }
 
-exports.getAllChats = async function(req, res){
-try{
-    let chat = new Chat(req.body);
-   let allChats = await chat.getAllChats();
-    res.json(allChats)
-} catch(e){
-    console.log(e)
-    res.json("failed")
-}
-}
-
 // exports.getAllChats = async function(req, res){
 // try{
 //     let chat = new Chat(req.body);
@@ -34,10 +23,11 @@ try{
 // }
 // }
 
+
 exports.getChatConvo = async function(req, res){
     try{
     let chat = new Chat();
-   let chats = await chat.getChatConvo(req.requesterId, req.chatContactId); //match both with senderId and recieverID
+   let chats = await chat.getChatConvo(req.id, req.chatContactId);
     res.json(chats)
 } catch(e){
     console.log(e)

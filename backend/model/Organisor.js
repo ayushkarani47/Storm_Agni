@@ -78,5 +78,13 @@ Organisor.prototype.login = async function () {
     }
 };
 
+Organisor.prototype.getAllOrganisors = async function(){
+    let allOrganisors = await organisorsCollection.find({}).toArray()
+    return allOrganisors;
+}
 
+Organisor.prototype.getOrganisorById = async function(organisorId){
+    let organisorDoc = await organisorsCollection.find({_id: new ObjectId(organisorId)}).toArray()
+    return organisorDoc;
+}
 module.exports = Organisor

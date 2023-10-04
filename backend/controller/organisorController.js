@@ -12,6 +12,7 @@ exports.register = async function (req, res) {
 }
 
 
+
 exports.login = function (req, res) {
     console.log(req.body);
     let organisor = new Organisor(req.body);
@@ -32,3 +33,15 @@ exports.login = function (req, res) {
             console.log(e);
         });
 };
+
+exports.getAllOrganisors = async function(req, res){
+    let organisor = new Organisor()
+    let allOrganisors = await organisor.getAllOrganisors()
+    res.json(allOrganisors)
+}
+
+exports.getOrganisorById = async function(req, res){
+    let organisor = new Organisor()
+    let organisorDoc = await organisor.getOrganisorById(req.params.id) //somethinmg equivalent to req.parmas.id
+    res.json(organisorDoc)
+}

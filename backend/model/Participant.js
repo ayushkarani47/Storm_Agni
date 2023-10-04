@@ -1,4 +1,4 @@
-const ParticipantCollection = require('../db').collection("Participant");
+const participantsCollection = require('../db').collection("participants");
 const ObjectID = require('mongodb').ObjectID
 const bcrypt = require('bcrypt')
 // const validator = require("validator")
@@ -17,8 +17,7 @@ Participant.prototype.cleanUp =function(){
    participantContactNum: this.data.participantContactNum, //copy same thing as lhs after the .
    role: "participant",
    participantPassword:this.data.participantPassword,
-   feedback:this.data.feedback,
-   preferredEventType : this.data.preferredEventType,
+ 
    }
    
 }
@@ -39,7 +38,7 @@ Participant.prototype.register = async function () {
           // hash user password
           let salt = bcrypt.genSaltSync(10)
           this.data.participantPassword = bcrypt.hashSync(this.data.participantPasswordPassword, salt)
-          await ParticipantCollection.insertOne(this.data)
+          await participantsCollection.insertOne(this.data)
           resolve()
         } else {
           reject(this.errors)
@@ -72,5 +71,13 @@ Participant.prototype.login = async function () {
     }
 };
 
+Participant.prototype.getAllParticipants = async function(){
+    let allParticipants = await participantsCollection.find({}).toArray()
+    return allParticipants;
+}
 
+Participant.prototype.getParticipantbyId = async function(participantId){
+    let participantDoc = await participantsCollection.find({_id: new ObjectID(participantId)}).toArray()
+    return participantDoc;
+}
 module.exports = Participant

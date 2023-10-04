@@ -1,6 +1,7 @@
-const ChatCollection = require('../db').collection("Chat");
+const chatsCollection = require('../db').collection("chats");
 const ObjectID = require('mongodb').ObjectID
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+const { ObjectId } = require('mongodb');
 // const validator = require("validator")
 // const md5 = require('md5')
 let Chat = function(data){
@@ -11,23 +12,46 @@ this.errors =[]
 Chat.prototype.cleanUp = async function () {
     // Clean up the data as before
     this.data = {
-        sentTime: this.data.sentTime,
-        content: this.data.content,
-        receiverId: this.data.receiverId,
-        senderId: this.data.senderId,
+        messageContent: this.data.messageContent,
+        receiverId: new ObjectID(this.data.receiverId),
+        senderId: new ObjectID(this.data.senderId),
+        sentTime: new Date(),
     };
+}
 
+ Chat.prototype.sendChat = async function(){
+    this.cleanUp()
     try {
-        // Insert the cleaned-up message into the database
-        const result = await ChatCollection.insertOne(this.data);
+        await chatsCollection.insertOne(this.data);
+    } catch (error) {
+        console.error("Error storing message in the database:", error);
+    }
+};
 
-        if (result.insertedCount === 1) {
-            console.log("Message successfully stored in the database.");
-        } else {
-            console.error("Message insertion failed.");
-        }
+ Chat.prototype.getChatConvo = async function(requesterId, chatContactId){
+    this.cleanUp()
+    try {
+      let chats =   await chatsCollection.find({
+            $and: [
+                {
+                    $or: [
+                        { senderId: new ObjectId(requesterId) },
+                        { senderId: new ObjectId(chatContactId) }
+                    ]
+                },
+                {
+                    $or: [
+                        { receiverId: new ObjectId(requesterId) },
+                        { receiverId: new ObjectId(chatContactId)}
+                    ]
+                }
+            ]
+        }).toArray();
+        return chats
     } catch (error) {
         console.error("Error storing message in the database:", error);
     }
 };
  
+
+module.exports = Chat

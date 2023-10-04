@@ -1,16 +1,17 @@
-const venderCollection = require('../db').collection("Vender");
+const vendorsCollection = require('../db').collection("vendors");
 const ObjectID = require('mongodb').ObjectID
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+const { ObjectId } = require('mongodb');
 // const validator = require("validator")
 // const md5 = require('md5')
-let Vender = function(data){
+let Vendor = function(data){
 this.data = data
 this.errors =[]
 }
 
 
 //For now on;ly dealing with company as a whole entity. (not sub agents)
-Vender.prototype.cleanUp =function(){
+Vendor.prototype.cleanUp =function(){
    this.data = {
    venName: this.data.venName,
    venEmail: this.data.venEmail,
@@ -21,10 +22,11 @@ Vender.prototype.cleanUp =function(){
    socialMediaLinks:this.data.socialMediaLinks ,
    wbsiteLink:this.data.wbsiteLink ,
    expertise: this.data.expertise,
-   foodType: this.data.foodType,
-   venPricing:this.data.venPricing,
+   venItems: this.data.venitems, //object of items and their pricing eg {item: banquet hall, price : 30000/day}
    bio:this.data.bio,
-   role: "Vender",
+   role: "vendor",
+   isVetted : false,
+   documents: this.data.documents, //pan, buisness lisence, etc.
    reputation: 0, //based on feedback;
    venPassword:this.data.venPassword
    }
@@ -46,8 +48,8 @@ Organisor.prototype.register = async function () {
         if (!this.errors.length) {
           // hash user password
           let salt = bcrypt.genSaltSync(10)
-          this.data.orgPassword = bcrypt.hashSync(this.data.venPassword, salt)
-          await organisorsCollection.insertOne(this.data)
+          this.data.venPassword = bcrypt.hashSync(this.data.venPassword, salt)
+          await vendorsCollection.insertOne(this.data)
           resolve()
         } else {
           reject(this.errors)
@@ -55,11 +57,11 @@ Organisor.prototype.register = async function () {
       })
 }
 
-Vender.prototype.login = async function () {
+Vendor.prototype.login = async function () {
     try {
         console.log(this.data.venEmail);
         this.cleanUp();
-        const attemptedUser = await organisorsCollection.findOne({ venEmail: this.data.venEmail });
+        const attemptedUser = await vendorsCollection.findOne({ venEmail: this.data.venEmail });
         console.log("Found! based on email");
         console.log(attemptedUser);
 
@@ -80,5 +82,13 @@ Vender.prototype.login = async function () {
     }
 };
 
+Vendor.prototype.getAllVendors = async function(){
+    let allVendors = await vendorsCollection.find({}).toArray()
+    return allVendors;
+}
 
-module.exports = Vender
+Vendor.prototype.getVendorById = async function(vendorId){
+    let vendorDoc = await vendorsCollection.find({_id: new ObjectId(vendorId)}).toArray()
+    return vendorDoc;
+}
+module.exports = Vendor

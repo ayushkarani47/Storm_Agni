@@ -1,0 +1,34 @@
+body{
+  background-color: #f5f8fe;
+}
+/* App.css */
+.App {
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  font-size: 24px;
+  margin: 20px 0;
+}
+
+/* KanbanBoard.css */
+.kanban-board {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+  padding: 20px;
+}
+
+.column {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  min-width: 250px;
+}
+
+.move-button {
+  display: block;
+  margin-top: 4px;
+}
