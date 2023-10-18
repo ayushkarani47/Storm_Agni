@@ -5,6 +5,7 @@ const fileUpload = require('express-fileupload')
 const path = require('path')
 const fs = require('fs')
 const { ObjectID } = require('mongodb')
+const { default: axios } = require('axios')
 
 exports.hostEvent = async function(req, res){
     let multipleNames =[]
@@ -43,7 +44,7 @@ exports.hostEvent = async function(req, res){
     }
     let event = new Event(req.body)
     console.log(req.body)
-    await  event.addEvent()
+    await  event.hostEvent()
     req.flash("success", "Event Added Successfully.")
     req.session.save(function() {
       res.redirect('/eventList')
@@ -51,10 +52,12 @@ exports.hostEvent = async function(req, res){
 }
 
 
-exports.getAllEvents = async function(){
+exports.getAllEvents = async function(req, res){
     let event = new Event()
   let events =  await event.getAllEvents()
-    res.send(events)
+    res.render('eventListAdmin',{
+      events: events
+    })
 }
 
 
@@ -65,13 +68,36 @@ exports.registerForEvent = async function(req, res){
     await event.registerForEvent(req.params.participantId,req.params.eventId)
     let participant = new Participant()
     await participant.registerForEvent(req.params.participantId,req.params.eventId)
+    await axios.post('/https://salesbrahma.com/regsiteredForEvent',{
+      eventName: "Buisness Bliss",
+      contactNum: "0=9930990504"
+    })
     req.flash("success", "Registered Successfully.")
     req.session.save(function() {
       res.redirect('/')
     })
 }   
 
-
+exports.eventPageAdminView = async function(req, res){
+  let event = new Event()
+  let eventDoc = await event.getEventById(req.params.id)
+  
+  let participant = new Participant()
+  
+  // for(let x of eventDoc.registeredParticipants){
+  //   let studDoc =  await student.getStudentById(x.studId)
+  // arr.push(studDoc)
+  // console.log(arr)
+  // }
+  
+  let registeredParticipants = await participant.getRegisteredParticipants(req.params.id)
+  
+  res.render('event-profile', {
+    event : eventDoc,
+    participants: registeredParticipants
+  
+  })
+  }
 exports.markPresent = async function(req, res){
     console.log("hit")
     console.log(req.body.eventId) 

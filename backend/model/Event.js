@@ -1,5 +1,4 @@
 const eventsCollection = require('../db').collection("Events");
-const ObjectID = require('mongodb').ObjectID
 const bcrypt = require('bcrypt');
 const { ObjectId } = require('mongodb');
 // const validator = require("validator")
@@ -13,31 +12,30 @@ this.errors =[]
 //For now on;ly dealing with company as a whole entity. (not sub agents)
 Event.prototype.cleanUp =function(){
    this.data = {
-   eventName: this.data.eventName,
-   eventDescription: this.data.eventDescription,
-   eventPoster: this.data.eventPoster, //pdf
-   eventAttachment: this.data.eventAttachment,//pdf
-   eventType:this.data.eventType,
-   isPaid:this.data.isPaid,
-   location:this.data.location,
-   maxAttendees:this.data.maxAttendees,
-   whatsAppLink: this.data.whatsAppLink,
-   eventStartDate: new Date(this.data.startDate),
-   eventStartTime: this.data.startTime,
-   eventEndDate: new Date(this.data.endDate),
-   eventEndTime: this.data.endTime,
-   organisorDetails: this.data.organisorDetails,
-   totalBudget: this.data.totalBudget,
-   photoDriveLink: this.data.photoDriveLink,
-   category: this.data.category, //category: amount
-   registeredParticipants: [],
-   presentParticipants: [],
-   winners:[], //object o1: name, o1:number
-   isCertified: this.data.isCertified,
-   isWalkInallowed : this.data.isWalkInallowed,
-   virtualCoins: this.data.vcirtualCoins,
-   hostedBy: new ObjectId(this.data.hostedBy), //id of the person who clicks on raise event 
-   addDate: new Date()
+    eventName: this.data.eventName,
+    eventDescription: this.data.eventDescription,
+    eventPoster: this.data.eventPoster,
+    eventLikeCount: 0,
+    eventStartDate: new Date(this.data.startDate),
+    eventStartTime: this.data.startTime,
+    eventEndDate: new Date(this.data.endDate),
+    eventEndTime: this.data.endTime,
+    eventAttachment: this.data.eventAttachment,
+    contactName1 : this.data.contact1,
+    contact1 : this.data.contactNo1,
+    contactName2 : this.data.contact2,
+    contact2 : this.data.contactNo2,
+    workSubmissionMail: this.data.email,
+    whatsAppLink: this.data.whatsAppLink,
+    isCertificate: Boolean(this.data.isCertificate),
+    // eventCriteria: this.data.criteria, //(takes year 1/2/3)
+    isWalkIn: Boolean(this.data.isWalkIn),
+    registeredParticipants: [],
+    presentParticipants: [],
+    winners:[],
+    virtualCoins: Number(this.data.virtualCoins),
+    createdBy: this.data.hostedBy, //(admin id)
+    createdDate: new Date()
    }
    
 }
@@ -51,7 +49,7 @@ Event.prototype.registerForEvent = async function(participantId, eventId){
    try{
        console.log(participantId)
        console.log(eventId)
-       await eventsCollection.findOneAndUpdate({_id: new ObjectID(eventId)}, {$push:{ "registeredParticipants":{participantId: new ObjectID(participantId), date: new Date()} }}) 
+       await eventsCollection.findOneAndUpdate({_id: new ObjectId(eventId)}, {$push:{ "registeredParticipants":{participantId: new ObjectId(participantId), date: new Date()} }}) 
 
    } catch(e){
 console.log(e)
@@ -63,7 +61,7 @@ console.log(e)
 //    }
 
    Event.prototype.markPresent = async function(eventId, participantId, adminId){
-      return eventsCollection.findOneAndUpdate({_id: new ObjectID(eventId)}, {"$push":{"presentParticipants":{"participantId": new ObjectID(participantId), "markedPresentBy": new ObjectID(adminId), "date": new Date(), "certificateRecvd": false}}}, {new: true}).then(eventDoc=>{
+      return eventsCollection.findOneAndUpdate({_id: new ObjectId(eventId)}, {"$push":{"presentParticipants":{"participantId": new ObjectId(participantId), "markedPresentBy": new ObjectId(adminId), "date": new Date(), "certificateRecvd": false}}}, {new: true}).then(eventDoc=>{
           // console.log(eventDoc)
                return eventDoc;
            }).catch((e)=>{
@@ -85,7 +83,7 @@ console.log(e)
 //    console.log(participantId);
 //    let data = await eventsCollection.countDocuments({presentParticipants: {
 //      $elemMatch: {
-//        "participantId": new ObjectID(participantId)
+//        "participantId": new ObjectId(participantId)
 //      }
 //    }})
 //    console.log("Counttttttttttttttttttt");
@@ -97,7 +95,7 @@ Event.prototype.getRegisteredParticipants = async function(participantId){
    console.log(participantId);
    let data = await eventsCollection.countDocuments({registeredParticipants: {
      $elemMatch: {
-       "participantId": new ObjectID(participantId)
+       "participantId": new ObjectId(participantId)
      }
    }})
    console.log("Counttttttttttttttttttt");
@@ -107,6 +105,14 @@ Event.prototype.getRegisteredParticipants = async function(participantId){
 
 Event.prototype.getAllEvents = async function(){
    let events =  await eventsCollection.find({}).sort({eventStarteDate: 1 }).toArray()
+   console.log(events)
    return events
    }
+
+
+   
+Event.prototype.getEventById = async function(eventId){
+  let eventDoc = await eventsCollection.findOne({_id: new ObjectId(eventId)})
+  return eventDoc
+}
 module.exports = Event

@@ -26,11 +26,12 @@ import Navbar from "./Components/Navbar";
 import MainContent from "./Components/MainContent";
 import EventForm from "./Components/EventTest/EventForm";
 import LoginForm from "./Components/Kanban/LoginForm";
+import Calendar from "./Components/Calendar";
 function App() {
   return (
     <>
       <BrowserRouter>
-        <LoginForm />
+        <Calendar/>
         <Routes>
         <Route path="/" element={<Dashboard/>} />
           <Route path="/chat" element={<Chat />} />

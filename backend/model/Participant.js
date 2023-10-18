@@ -1,6 +1,7 @@
 const participantsCollection = require('../db').collection("participants");
 const ObjectID = require('mongodb').ObjectID
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+const { ObjectId } = require('mongodb');
 // const validator = require("validator")
 // const md5 = require('md5')
 let Participant = function(data){
@@ -37,7 +38,7 @@ Participant.prototype.register = async function () {
         if (!this.errors.length) {
           // hash user password
           let salt = bcrypt.genSaltSync(10)
-          this.data.participantPassword = bcrypt.hashSync(this.data.participantPasswordPassword, salt)
+          this.data.participantPassword = bcrypt.hashSync(this.data.participantPassword, salt)
           await participantsCollection.insertOne(this.data)
           resolve()
         } else {
@@ -50,7 +51,7 @@ Participant.prototype.login = async function () {
     try {
         console.log(this.data.participantEmail);
         this.cleanUp();
-        const attemptedUser = await ParticipantCollection.findOne({ participantEmail: this.data.participantEmail });
+        const attemptedUser = await participantsCollection.findOne({ participantEmail: this.data.participantEmail });
         console.log("Found! based on email");
         console.log(attemptedUser);
 
@@ -77,7 +78,19 @@ Participant.prototype.getAllParticipants = async function(){
 }
 
 Participant.prototype.getParticipantbyId = async function(participantId){
-    let participantDoc = await participantsCollection.find({_id: new ObjectID(participantId)}).toArray()
+    let participantDoc = await participantsCollection.find({_id: new ObjectId(participantId)}).toArray()
     return participantDoc;
 }
+
+
+Participant.prototype.registerForEvent = async function(partId, eventId){
+    await participantsCollection.findOneAndUpdate({_id: new ObjectId(partId)}, {"$push":{ "eventsRegisteredIn":{eventId: eventId, date: new Date()} }}) 
+
+  }
+
+  Participant.prototype.getRegisteredParticipants = async function(eventId){
+    let registeredStudents =  await participantsCollection.find({eventsRegisteredIn:{ $elemMatch: { "eventId": eventId} }}).toArray()
+    return registeredStudents
+  }
+  
 module.exports = Participant
